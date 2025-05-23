@@ -24,8 +24,8 @@ config({ path: "./.env" });
 const allowedOrigins = [
   "http://localhost:5173", // your React dev server
   "http://localhost:5174",
-  "https://birth-registration-virid.vercel.app/",
-  "https://birth-registration-dashboard.vercel.app/",
+  "https://birth-registration-virid.vercel.app",
+  "https://birth-registration-dashboard.vercel.app",
   // "https://your-production-site.com"  // add production URL when deployed
 ];
 
