@@ -11,7 +11,8 @@ const Dashboard = () => {
     const fetchBirthRecords = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/v1/birth-records/getall",
+          // "http://localhost:5000/api/v1/birth-records/getall",
+          "https://birthregistration.onrender.com/api/v1/birth-records/getall",
           { withCredentials: true }
         );
         setBirthRecords(data.records);
@@ -26,7 +27,8 @@ const Dashboard = () => {
   const handleUpdateStatus = async (recordId, newStatus) => {
     try {
       const { data } = await axios.put(
-        `http://localhost:5000/api/v1/birth-records/update-status/${recordId}`,
+        // `http://localhost:5000/api/v1/birth-records/update-status/${recordId}`,
+        `https://birthregistration.onrender.com/api/v1/birth-records/update-status/${recordId}`,
         { status: newStatus },
         { withCredentials: true }
       );

@@ -11,7 +11,8 @@ const Messages = () => {
     const fetchMessages = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/v1/message/getall",
+          // "http://localhost:5000/api/v1/message/getall",
+          "https://birthregistration.onrender.com/api/v1/message/getall",
           { withCredentials: true }
         );
         setMessages(data.messages);

@@ -13,8 +13,6 @@ const app = express();
 config({ path: "./.env" });
 // app.use(cors());
 
-console.log(process.env.FRONTEND_URL_ONE, process.env.FRONTEND_URL_TWO);
-
 // app.use(
 //   cors({
 //     origin: [process.env.FRONTEND_URL_ONE, process.env.FRONTEND_URL_TWO],
@@ -25,7 +23,9 @@ console.log(process.env.FRONTEND_URL_ONE, process.env.FRONTEND_URL_TWO);
 
 const allowedOrigins = [
   "http://localhost:5173", // your React dev server
-  "http://localhost:5174", // your React dev server
+  "http://localhost:5174",
+  "https://birth-registration-virid.vercel.app/",
+  "https://birth-registration-dashboard.vercel.app/",
   // "https://your-production-site.com"  // add production URL when deployed
 ];
 

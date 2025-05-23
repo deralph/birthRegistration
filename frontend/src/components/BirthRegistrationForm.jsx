@@ -42,7 +42,8 @@ const BirthRegistrationForm = () => {
       };
 
       const { data } = await axios.post(
-        "http://localhost:5000/api/v1/birth-records/post",
+        // "http://localhost:5000/api/v1/birth-records/post",
+        "https://birthregistration.onrender.com/api/v1/birth-records/post",
         payload,
         {
           withCredentials: true,

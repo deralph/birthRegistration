@@ -18,9 +18,13 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     await axios
-      .get("http://localhost:5000/api/v1/user/admin/logout", {
-        withCredentials: true,
-      })
+      .get(
+        // "http://localhost:5000/api/v1/user/admin/logout",
+        "https://birthregistration.onrender.com/api/v1/user/admin/logout",
+        {
+          withCredentials: true,
+        }
+      )
       .then((res) => {
         toast.success(res.data.message);
         setIsAuthenticated(false);
