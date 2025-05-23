@@ -1,71 +1,74 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { db } from "./firebase"; // Adjust the path as necessary
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const BirthRegistrationForm = () => {
-  const [childName, setChildName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [gender, setGender] = useState("");
-  const [placeOfBirth, setPlaceOfBirth] = useState("");
-  const [motherName, setMotherName] = useState("");
-  const [motherDOB, setMotherDOB] = useState("");
-  const [fatherName, setFatherName] = useState("");
-  const [fatherDOB, setFatherDOB] = useState("");
-  const [parentAddress, setParentAddress] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
+  const [formData, setFormData] = useState({
+    childName: "",
+    dateOfBirth: "",
+    gender: "",
+    placeOfBirth: "",
+    motherName: "",
+    motherDOB: "",
+    fatherName: "",
+    fatherDOB: "",
+    parentAddress: "",
+    contactEmail: "",
+    contactPhone: "",
+    doctorName: "",
+  });
 
-  // *** New doctor-related state ***
-  // const [selectedDoctorId, setSelectedDoctorId] = useState("");
-  const [selectedDoctorName, setSelectedDoctorName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    if (!formData.doctorName) {
+      setLoading(false);
+      return toast.error("Please enter the delivering doctor's name.");
+    }
+
     try {
-      if (!selectedDoctorName) {
-        return toast.error("Please select the delivering doctor");
-      }
+      await addDoc(collection(db, "birthRecords"), {
+        ...formData,
+        createdAt: serverTimestamp(),
+      });
 
-      const payload = {
-        childName,
-        dateOfBirth,
-        gender,
-        placeOfBirth,
-        motherName,
-        motherDOB,
-        fatherName,
-        fatherDOB,
-        parentAddress,
-        contactEmail,
-        contactPhone,
-        doctorName: selectedDoctorName,
-      };
+      toast.success("Birth registration submitted successfully!");
 
-      const { data } = await axios.post(
-        // "http://localhost:5000/api/v1/birth-records/post",
-        "https://birthregistration.onrender.com/api/v1/birth-records/post",
-        payload,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      toast.success(data.message);
-      // Reset all form fields
-      setChildName("");
-      setDateOfBirth("");
-      setGender("");
-      setPlaceOfBirth("");
-      setMotherName("");
-      setMotherDOB("");
-      setFatherName("");
-      setFatherDOB("");
-      setParentAddress("");
-      setContactEmail("");
-      setContactPhone("");
-      setSelectedDoctorName("");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed!");
+      // Reset form fields
+      setFormData({
+        childName: "",
+        dateOfBirth: "",
+        gender: "",
+        placeOfBirth: "",
+        motherName: "",
+        motherDOB: "",
+        fatherName: "",
+        fatherDOB: "",
+        parentAddress: "",
+        contactEmail: "",
+        contactPhone: "",
+        doctorName: "",
+      });
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      setError("Registration failed. Please try again.");
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,19 +83,28 @@ const BirthRegistrationForm = () => {
         <div>
           <input
             type="text"
+            name="childName"
             placeholder="Child Full Name"
-            value={childName}
-            onChange={(e) => setChildName(e.target.value)}
+            value={formData.childName}
+            onChange={handleChange}
+            required
           />
           <input
             type="date"
+            name="dateOfBirth"
             placeholder="Child Date of Birth"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            required
           />
         </div>
         <div>
-          <select value={gender} onChange={(e) => setGender(e.target.value)}>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            required
+          >
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
@@ -100,9 +112,11 @@ const BirthRegistrationForm = () => {
           </select>
           <input
             type="text"
+            name="placeOfBirth"
             placeholder="Place of Birth (e.g., Hospital Name)"
-            value={placeOfBirth}
-            onChange={(e) => setPlaceOfBirth(e.target.value)}
+            value={formData.placeOfBirth}
+            onChange={handleChange}
+            required
           />
         </div>
 
@@ -110,15 +124,19 @@ const BirthRegistrationForm = () => {
         <div>
           <input
             type="text"
+            name="motherName"
             placeholder="Mother’s Full Name"
-            value={motherName}
-            onChange={(e) => setMotherName(e.target.value)}
+            value={formData.motherName}
+            onChange={handleChange}
+            required
           />
           <input
             type="date"
+            name="motherDOB"
             placeholder="Mother’s Date of Birth"
-            value={motherDOB}
-            onChange={(e) => setMotherDOB(e.target.value)}
+            value={formData.motherDOB}
+            onChange={handleChange}
+            required
           />
         </div>
 
@@ -126,15 +144,19 @@ const BirthRegistrationForm = () => {
         <div>
           <input
             type="text"
+            name="fatherName"
             placeholder="Father’s Full Name"
-            value={fatherName}
-            onChange={(e) => setFatherName(e.target.value)}
+            value={formData.fatherName}
+            onChange={handleChange}
+            required
           />
           <input
             type="date"
+            name="fatherDOB"
             placeholder="Father’s Date of Birth"
-            value={fatherDOB}
-            onChange={(e) => setFatherDOB(e.target.value)}
+            value={formData.fatherDOB}
+            onChange={handleChange}
+            required
           />
         </div>
 
@@ -142,34 +164,47 @@ const BirthRegistrationForm = () => {
         <div>
           <textarea
             rows="2"
+            name="parentAddress"
             placeholder="Parent’s Address"
-            value={parentAddress}
-            onChange={(e) => setParentAddress(e.target.value)}
+            value={formData.parentAddress}
+            onChange={handleChange}
+            required
           />
         </div>
         <div>
           <input
             type="email"
+            name="contactEmail"
             placeholder="Contact Email"
-            value={contactEmail}
-            onChange={(e) => setContactEmail(e.target.value)}
+            value={formData.contactEmail}
+            onChange={handleChange}
+            required
           />
           <input
-            type="text"
+            type="tel"
+            name="contactPhone"
             placeholder="Contact Phone"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
+            value={formData.contactPhone}
+            onChange={handleChange}
+            required
           />
           <input
             type="text"
-            placeholder="Deliver Doctor Name"
-            value={selectedDoctorName}
-            onChange={(e) => setSelectedDoctorName(e.target.value)}
+            name="doctorName"
+            placeholder="Delivering Doctor Name"
+            value={formData.doctorName}
+            onChange={handleChange}
+            required
           />
         </div>
 
         {/* Submit */}
-        <button type="submit">Register Birth</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Submitting..." : "Register Birth"}
+        </button>
+
+        {/* Error Message */}
+        {error && <p className="error-message">{error}</p>}
       </form>
     </div>
   );

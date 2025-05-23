@@ -1,54 +1,59 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../main";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 const Dashboard = () => {
   const [birthRecords, setBirthRecords] = useState([]);
+  const { isAuthenticated, admin } = useContext(Context);
+  const db = getFirestore();
+  console.log(admin)
 
   useEffect(() => {
     const fetchBirthRecords = async () => {
       try {
-        const { data } = await axios.get(
-          // "http://localhost:5000/api/v1/birth-records/getall",
-          "https://birthregistration.onrender.com/api/v1/birth-records/getall",
-          { withCredentials: true }
-        );
-        setBirthRecords(data.records);
+        const querySnapshot = await getDocs(collection(db, "birthRecords"));
+        const records = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBirthRecords(records);
       } catch (error) {
         console.error("Error fetching birth records:", error);
         setBirthRecords([]);
       }
     };
+
     fetchBirthRecords();
-  }, []);
+  }, [db]);
 
   const handleUpdateStatus = async (recordId, newStatus) => {
     try {
-      const { data } = await axios.put(
-        // `http://localhost:5000/api/v1/birth-records/update-status/${recordId}`,
-        `https://birthregistration.onrender.com/api/v1/birth-records/update-status/${recordId}`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
+      const recordRef = doc(db, "birthRecords", recordId);
+      await updateDoc(recordRef, { status: newStatus });
 
       setBirthRecords((prevRecords) =>
         prevRecords.map((record) =>
-          record._id === recordId ? { ...record, status: newStatus } : record
+          record.id === recordId ? { ...record, status: newStatus } : record
         )
       );
 
-      toast.success(data.message);
+      toast.success("Status updated successfully.");
     } catch (error) {
       console.error("Error updating status:", error);
-      toast.error(error.response?.data?.message || "Failed to update status");
+      toast.error("Failed to update status.");
     }
   };
 
-  const { isAuthenticated, admin } = useContext(Context);
   if (!isAuthenticated) {
-    return <Navigate to={"/login"} />;
+    return <Navigate to="/login" />;
   }
 
   return (
@@ -63,7 +68,7 @@ const Dashboard = () => {
           <div className="content">
             <div>
               <p>Welcome,</p>
-              <h5>{admin && `${admin.firstName} ${admin.lastName}`}</h5>
+              {/* <h5>{admin && `${admin.firstName} ${admin.lastName}`}</h5> */}
             </div>
             <p>
               This dashboard allows you to view and manage all birth
@@ -96,9 +101,9 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {birthRecords && birthRecords.length > 0 ? (
+              {birthRecords.length > 0 ? (
                 birthRecords.map((record) => (
-                  <tr key={record._id}>
+                  <tr key={record.id}>
                     <td data-label="Child">{record.childName}</td>
                     <td data-label="DOB">
                       {new Date(record.dateOfBirth)
@@ -112,10 +117,11 @@ const Dashboard = () => {
                     <td data-label="Doctor">{record.doctorName}</td>
                     <td data-label="Status">
                       <select
-                        className={`status-select status-${record.status.toLowerCase()}`}
+                        // className={`status-select status-${record.status.toLowerCase()}`}
+                        className={`status-select status-${record.status}`}
                         value={record.status}
                         onChange={(e) =>
-                          handleUpdateStatus(record._id, e.target.value)
+                          handleUpdateStatus(record.id, e.target.value)
                         }
                       >
                         <option value="Pending">Pending</option>

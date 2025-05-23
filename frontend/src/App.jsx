@@ -9,31 +9,33 @@ import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import { Context } from "./main";
 import Login from "./Pages/Login";
+import { auth } from "./firebase"; // Ensure this path points to your firebase.js file
+import { onAuthStateChanged } from "firebase/auth";
+
 const App = () => {
-  const { isAuthenticated, setIsAuthenticated, setUser } = useContext(Context);
+  const { setIsAuthenticated, setUser } = useContext(Context);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          // "http://localhost:5000/api/v1/user/patient/me",
-          "https://birthregistration.onrender.com/api/v1/user/patient/me",
-          {
-            withCredentials: true,
-          }
-        );
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
         setIsAuthenticated(true);
-        setUser(response.data.user);
-      } catch (error) {
+        setUser({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          // Add other user properties as needed
+        });
+      } else {
         setIsAuthenticated(false);
-        setUser({});
+        setUser(null);
       }
-    };
-    fetchUser();
-  }, [isAuthenticated]);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [setIsAuthenticated, setUser]);
 
   return (
     <>
