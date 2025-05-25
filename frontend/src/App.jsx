@@ -11,7 +11,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Context } from "./main";
 import Login from "./Pages/Login";
-import { auth } from "./firebase"; // Ensure this path points to your firebase.js file
+import { auth } from "./components/firebase"; // Ensure this path points to your firebase.js file
 import { onAuthStateChanged } from "firebase/auth";
 
 const App = () => {
